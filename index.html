@@ -1,323 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Generate and play through freediving static tables." />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Freediving Tables • 100% Private & Offline</title>
+  <meta name="description" content="CO2, O2 and custom apnea tables. No tracking, no internet needed.">
 
-    <link rel="shortcut icon" type="image/png" href="favicon.png"/>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:,"> <!-- prevents favicon request -->
+  <meta name="theme-color" content="#0d1b2a">
 
-    <meta property="og:image" content="http://robinmoisson.github.io/freediving/img/christine_freediving.jpg">
-    <meta property="og:description" content="Generate and play through freediving static tables." />
-
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:image" content="http://robinmoisson.github.io/freediving/img/christine_freediving.jpg">
-    <meta name="twitter:description" content="Generate and play through freediving static tables." />
-    <link rel="manifest" href="manifest.json">
-
-    <title>Freediving Tables</title>
-
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    <link rel="stylesheet" href="css/lavish-bootstrap.css">
-    <link rel="stylesheet" href="css/style.css">
-    
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --text: #212529;
+      --accent: #1b9aaa;
+      --card: white;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d1b2a;
+        --text: #e0e1dd;
+        --accent: #1b9aaa;
+        --card: #1b263b;
+      }
+    }
+    body {
+      margin:0; padding:0; font-family:system-ui,sans-serif;
+      background:var(--bg); color:var(--text); line-height:1.5;
+      min-height:100vh; display:flex; flex-direction:column;
+    }
+    main { flex:1; max-width:900px; margin:0 auto; padding:20px; width:100%; box-sizing:border-box; }
+    h1 { color:var(--accent); text-align:center; margin-bottom:8px; }
+    .card { background:var(--card); padding:20px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); margin-bottom:20px; }
+    input, select, button {
+      padding:10px; margin:8px 0; border-radius:8px; border:1px solid #ccc; font-size:1em;
+    }
+    button {
+      background:var(--accent); color:white; border:none; cursor:pointer; font-weight:bold;
+    }
+    button:hover { opacity:0.9; }
+    table { width:100%; border-collapse:collapse; margin-top:20px; }
+    th, td { padding:12px; text-align:center; border-bottom:1px solid #ddd; }
+    th { background:rgba(27,154,170,0.2); }
+    .active { background:#e63946 !important; color:white; font-weight:bold; animation:pulse 1s infinite; }
+    @keyframes pulse { 0%{opacity:1} 50%{opacity:0.7} 100%{opacity:1} }
+    footer { text-align:center; padding:20px; color:#666; font-size:0.9em; }
+    @media (max-width:600px) {
+      .table-container { overflow-x:auto; display:block; }
+      table { min-width:500px; }
+    }
+  </style>
 </head>
 <body>
+  <main>
+    <h1>Freediving Training Tables</h1>
+    <p style="text-align:center;">100% offline • No tracking • Works on any device</p>
 
-<div class="main-div-wrapper">
-    <div class="container main-div">
+    <div class="card">
+      <label>Personal best static breath-hold (seconds):</label>
+      <input type="number" id="maxHold" value="180" min="30" step="10">
 
-        <!-- NAVBAR -->
-        <div class="row">
-            <nav class="navbar navbar-static-top navbar-inverse">
-                <div class="container-fluid">
-                    <div class="navbar-header">
-                        <a class="navbar-brand hidden-xs" href="/freediving">Freediving</a>
-                        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                                data-target="#navbar-collapse" aria-expanded="false">
-                            <span class="sr-only">Toggle navigation</span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                            <span class="icon-bar"></span>
-                        </button>
-                        <p class="navbar-text navbar-left-margin visible-xs" id="login_xs"></p>
-                    </div>
-                    <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
-                        <ul class="nav navbar-nav">
-                            <li class="active"><a href="/freediving" id="home-url">Tables</a></li>
-                            <li><a href="/freediving/static.html">Experiencing static</a></li>
-                        </ul>
-                    </div>
-                    <div class="navbar-header pull-right hidden-xs">
-                        <div class="login navbar-right"></div>
-                        <p class="syncing navbar-text navbar-right"></p>
-                    </div>
-                </div>
-            </nav>
-        </div>
+      <label>Table type:</label>
+      <select id="tableType">
+        <option value="co2">CO₂ Table (fixed hold, decreasing recovery)</option>
+        <option value="o2" selected>O₂ Table (increasing hold, fixed recovery)</option>
+        <option value="custom">Custom (you choose everything)</option>
+      </select>
 
-        <div class="row">
-            <div class="col-xs-12 col-sm-offset-1 col-sm-10">
+      <label>Number of repetitions:</label>
+      <select id="reps">
+        <option>6</option><option selected>8</option><option>10</option><option>12</option>
+      </select>
 
-                <h1>Freediving Tables</h1>
-
-                <!-- HISTORY -->
-                <div class="row history">
-                    <div class="col-xs-12">
-                        <h2>
-                            History
-                            <small>
-                                <a href="#" class="toggle-history">►Show history</a>
-                            </small>
-                        </h2>
-                    </div>
-
-                    <div class="x-scroll history-table hidden">
-                        <table class="table history">
-                            <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Type</th>
-                                <th>Repetitions</th>
-                                <th>Total time</th>
-                                <th>Holding time</th>
-                                <th>Shortest breath</th>
-                                <th>Completed?</th>
-                            </tr>
-                            </thead>
-                            <tbody class="history">
-                            <tr>
-                                <td colspan="100">No history yet</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- ACTIVE TABLE -->
-                <div class="row">
-
-                    <div class="col-xs-12">
-                        <h2 id="generated_table_title">Current table</h2>
-                    </div>
-
-                    <div class="col-xs-12 col-sm-6" id="generated_table_wrapper">
-                        <p id="total_time" class="total-time"></p>
-                        <div id="generated_table"><p>The table is empty - load yours below.</p></div>
-                    </div>
-
-                    <div class="col-xs-12 col-sm-6">
-                        <div id="timer" class="timer text-center hidden">
-                            <p id="timer_title"></p>
-                            <p id="timer_remaining" class="timer-remaining"></p>
-                        </div>
-                    </div>
-
-                </div>
-                <div class="row">
-                    <div class="col-xs-12 col-sm-4 btn-control">
-                        <button class="btn" id="submit_co2">Load CO2</button>
-                        <button class="btn" id="submit_o2">Load O2</button>
-                    </div>
-                    <div class="col-xs-12 col-sm-4 btn-control">
-                        <button id="pause_table" class="btn btn-warning" disabled="disabled">Pause</button>
-                        <button id="start_table" class="btn btn-success" disabled="disabled">Start apnea</button>
-                    </div>
-                </div>
-
-                <!-- GENERATE TABLE -->
-                <div class="row">
-                    <div class="col-xs-12">
-                        <div class="inline-title">
-                            <h2>Generate Table</h2>
-                            <button class="btn btn-link" id="reset_all" type="button">Reset<span class="hidden-xs"> all values</span>
-                            </button>
-                        </div>
-
-                        <div class="form-horizontal">
-                            <div class="row">
-
-                                <div class="col-xs-6">
-                                    <div class="form-group">
-                                        <label for="preparation_time" class="control-label col-xs-12 col-sm-6">
-                                            Initial rest time:
-                                        </label>
-                                        <div class="col-xs-12 col-sm-6">
-                                            <div class="input-group">
-                                                <input type="number" id="preparation_time" class="second-input form-control"/>
-                                                <div class="input-group-addon">s</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-6">
-                                    <div class="form-group">
-                                        <label for="round_number" class="control-label col-xs-12 col-sm-6">
-                                            Number of rounds:
-                                        </label>
-                                        <div class="col-xs-12 col-sm-6">
-                                            <input type="number" id="round_number" class="col-xs-2 form-control"/>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="checkbox col-xs-12 col-sm-6 col-md-4">
-                                    <label>
-                                        <input type="checkbox" id="is_playing_help_countdown" checked/>
-                                        Motivation countdown
-                                        <abbr title="Will give you your remaining time during breath hold at 60, 30 and 15s mark">
-                                            ?
-                                        </abbr>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <!-- CO2 TABLE -->
-                    <div class="col-xs-12 col-sm-6">
-                        <h3>CO2 Table</h3>
-
-                        <form id="co2_table" class="form-horizontal">
-                            <div class="row">
-                                <div class="col-xs-6 col-sm-12">
-                                    <div class="form-group row">
-                                        <label for="co2_first_rest" class="control-label col-xs-12 col-sm-6">
-                                            Starting rest time:
-                                        </label>
-                                        <div class="col-xs-12 col-sm-6">
-                                            <div class="input-group">
-                                                <input id="co2_first_rest" name="co2_first_rest" type="number"
-                                                       class="form-control second-input"/>
-                                                <div class="input-group-addon">s</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-6 col-sm-12">
-                                    <div class="form-group row">
-                                        <label for="co2_decrease_by" class="control-label col-sm-6">Decrease rest time
-                                            by:</label>
-                                        <div class="col-xs-12 col-sm-6">
-                                            <div class="input-group">
-                                                <input id="co2_decrease_by" name="co2_decrease_by" type="number"
-                                                       class="form-control second-input"/>
-                                                <div class="input-group-addon">s</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-6 col-sm-12">
-                                    <div class="form-group row">
-                                        <label for="co2_hold_time" class="control-label col-xs-12 col-sm-6">Hold time:</label>
-                                        <div class="col-xs-12 col-sm-6">
-                                            <div class="input-group">
-                                                <input id="co2_hold_time" name="co2_hold_time" type="number"
-                                                       class="form-control second-input"/>
-                                                <div class="input-group-addon">s</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 visible-xs">
-                                    <div class="text-right">
-                                        <button class="btn" type="submit">Load CO2 table</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-
-                    </div>
-
-                    <!-- O2 TABLE -->
-                    <div class="col-xs-12 col-sm-6">
-                        <h3>O2 Table</h3>
-
-                        <form id="o2_table" class="form-horizontal">
-                            <div class="row">
-                                <div class="col-xs-6 col-sm-12">
-                                    <div class="form-group row">
-                                        <label for="o2_rest" class="control-label col-sm-6">Rest time:</label>
-                                        <div class="col-xs-12 col-sm-6">
-                                            <div class="input-group">
-                                                <input id="o2_rest" name="o2_rest" type="number"
-                                                       class="form-control second-input">
-                                                <div class="input-group-addon">s</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-6 col-sm-12">
-                                    <div class="form-group row">
-                                        <label for="o2_max_hold" class="control-label col-xs-12 col-sm-6">Max hold time:</label>
-                                        <div class="col-xs-12 col-sm-6">
-                                            <div class="input-group">
-                                                <input id="o2_max_hold" name="o2_max_hold" type="number"
-                                                       class="form-control second-input"/>
-                                                <div class="input-group-addon">s</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-6 col-sm-12">
-                                    <div class="form-group row">
-                                        <label for="o2_increase_by" class="control-label col-xs-12 col-sm-6">Increase hold time
-                                            by:</label>
-                                        <div class="col-xs-12 col-sm-6">
-                                            <div class="input-group">
-                                                <input id="o2_increase_by" name="o2_increase_by" type="number"
-                                                       class="form-control second-input"/>
-                                                <div class="input-group-addon">s</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xs-12 visible-xs">
-                                    <div class="text-right">
-                                        <button class="btn" type="submit">Load O2 table</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <footer class="navbar-inverse container-fluid">
-                <p class="footer-text">Feedback? <a href="mailto:freediving@robinmoisson.com">Email me!</a></p>
-                <p class="footer-text">Made with <3 — photo courtesy of Christine Armie Marquez</p>
-            </footer>
-        </div>
+      <button onclick="generateAndStart()">Generate & Start Training</button>
+      <button onclick="resetAll()" style="background:#555; margin-left:10px;">Reset All Data</button>
     </div>
-</div>
 
-<!-- LOGIN MODAL -->
-<div class="modal fade" id="login_modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
-                </button>
-                <h4 class="modal-title" id="myModalLabel">Login</h4>
-            </div>
-            <form class="login">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <input type="email" placeholder="email" class="form-control email"/>
+    <div id="tableContainer" class="card table-container" style="display:none;"></div>
 
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Log In</button>
-                    </div>
-            </form>
-        </div>
+    <div class="card">
+      <h3>Session History (saved in your browser)</h3>
+      <div id="history"></div>
     </div>
-</div>
+  </main>
 
+  <footer>
+    100% private • No data leaves your device • Forked & improved by <a href="https://github.com/YOUR-USERNAME/freediving" target="_blank">@YOUR-USERNAME</a>
+  </footer>
+
+  <script>
+    // === CONFIGURATION ===
+    const CONFIG = {
+      o2Recovery: 120,        // seconds fixed recovery in O2 table
+      co2Hold: (max) => Math.round(max * 0.8), // 80% of PB for CO2 table
+      co2RecoveryStart: (max) => Math.round(max * 1.5)
+    };
+
+    let countdownInterval;
+    let currentRow = -1;
+
+    function generateTable() {
+      const maxHold = parseInt(document.getElementById('maxHold').value);
+      const type = document.getElementById('tableType').value;
+      const reps = parseInt(document.getElementById('reps').value);
+
+      if (maxHold < 30) throw "Enter a realistic breath-hold";
+
+      let rows = [];
+
+      if (type === 'o2') {
+        const step = maxHold / reps;
+        for (let i = 1; i <= reps; i++) {
+          rows.push({
+            hold: Math.round(step * i),
+            recovery: CONFIG.o2Recovery
+          });
+        }
+      } else if (type === 'co2') {
+        const hold = CONFIG.co2Hold(maxHold);
+        let recovery = CONFIG.co2RecoveryStart(maxHold);
+        const decrease = Math.round((recovery - 15) / (reps - 1));
+        for (let i = 0; i < reps; i++) {
+          rows.push({
+            hold: hold,
+            recovery: recovery - decrease * i
+          });
+        }
+      } else if (type === 'custom') {
+        // simple custom: 50-100% of maxHold with 2 min recovery
+        const step = maxHold / (reps + 1);
+        for (let i = 1; i <= reps; i++) {
+          rows.push({
+            hold: Math.round(step * i * 1.0),
+            recovery: 120
+          });
+        }
+      }
+
+      return rows;
+    }
+
+    function renderTable(table) {
+      const container = document.getElementById('tableContainer');
+      let html = `<h2 style="text-align:center">${document.getElementById('tableType').selectedOptions[0].text}</h2>`;
+      html += '<table><thead><tr><th>#</th><th>Hold</th><th>Recovery</th><th>Status</th></tr></thead><tbody>';
+
+      table.forEach((row, i) => {
+        html += `<tr id="row-${i}">
+          <td>${i+1}</td>
+          <td>${row.hold}s</td>
+          <td>${row.recovery}s</td>
+          <td id="status-${i}">Ready</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+      container.style.display = 'block';
+      container.scrollIntoView({behavior: 'smooth'});
+    }
+
+    function startCountdown(table) {
+      currentRow = 0;
+      nextPhase(table);
+    }
+
+    function nextPhase(table) {
+      if (currentRow >= table.length) {
+        document.getElementById('tableContainer').insertAdjacentHTML('beforeend',
+          '<h3 style="text-align:center;color:#1b9aaa;margin-top:30px;">Table completed! Well done</h3>');
+        saveSession();
+        return;
+      }
+
+      const row = table[currentRow];
+      const tr = document.getElementById(`row-${currentRow}`);
+      tr.classList.add('active');
+
+      if (currentRow === 0) {
+        speak("Get ready. First hold in 5 seconds");
+        countDown(5, () => doHold(row, table));
+      } else {
+        speak(`Breathe for ${row.recovery} seconds}`);
+        countDown(row.recovery, () => doHold(row, table));
+      }
+    }
+
+    function doHold(row, table) {
+      speak(`Hold for ${row.hold} seconds`);
+      let seconds = row.hold;
+      const statusCell = document.getElementById(`status-${currentRow}`);
+
+      countdownInterval = setInterval(() => {
+        statusCell.textContent = seconds > 0 ? `${seconds}s` : "Breathe!";
+        if (seconds <= 0) {
+          clearInterval(countdownInterval);
+          tr.classList.remove('active');
+          currentRow++;
+          setTimeout(() => nextPhase(table), 3000);
+        }
+        seconds--;
+      }, 1000);
+    }
+
+    function countDown(seconds, callback) {
+      let counter = seconds;
+      const updateDisplay = () => {
+        if (counter > 0) {
+          document.getElementById(`status-${currentRow-1}`)?.remove();
+          const msg = counter <= 3 ? counter.toString() : `Breathe for ${counter}s`;
+          speak(msg);
+        }
+      };
+      updateDisplay();
+      const interval = setInterval(() => {
+        counter--;
+        updateDisplay();
+        if (counter < 0) {
+          clearInterval(interval);
+          callback();
+        }
+      }, 1000);
+    }
+
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 0.9;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utter);
+      }
+    }
+
+    function saveSession() {
+      const maxHold = document.getElementById('maxHold').value;
+      const type = document.getElementById('tableType').value;
+      const sessions = JSON.parse(localStorage.getItem('freediveSessions') || '[]);
+
+      sessions.push({
+        date: new Date().toLocaleString(),
+        maxHold: maxHold + "s",
+        type: document.getElementById('tableType').selectedOptions[0].text
+      });
+
+      localStorage.setItem('freediveSessions', JSON.stringify(sessions));
+      loadHistory();
+    }
+
+    function loadHistory() {
+      const history = document.getElementById('history');
+      const sessions = JSON.parse(localStorage.getItem('freediveSessions') || '[]');
+      if (sessions.length === 0) {
+        history.innerHTML = '<i>No sessions yet</i>';
+        return;
+      }
+      let html = '<ul style="padding-left:20px;">';
+      sessions.slice(-10).reverse().forEach(s => {
+        html += `<li>${s.date} → ${s.type} (PB ${s.maxHold})</li>`;
+      });
+      html += '</ul>';
+      history.innerHTML = html;
+    }
+
+    function generateAndStart() {
+      clearInterval(countdownInterval);
+      document.querySelectorAll('tr.active').forEach(r => r.classList.remove('active'));
+      try {
+        const table = generateTable();
+        renderTable(table);
+        startCountdown(table);
+        saveSession(); // save even if they abort later
+      } catch (e) {
+        alert(e);
+      }
+    }
+
+    function resetAll() {
+      if (confirm("Delete all saved sessions?")) {
+        localStorage.removeItem('freediveSessions');
+        loadHistory();
+        alert("All data cleared");
+      }
+    }
+
+    // Init
+    window.onload = () => {
+      loadHistory();
+    };
+  </script>
 </body>
 
 
