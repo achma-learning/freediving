@@ -1,19 +1,19 @@
 {
   "name": "Freediving Tables",
   "short_name": "DiveTables",
-  "description": "Offline CO2 & O2 tables for freediving training – no tracking, fully private",
-  "start_url": "/index.html",
+  "description": "Private offline CO2/O2 training tables for freediving",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0d1b2a",
   "theme_color": "#1b9aaa",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "https://cdn.jsdelivr.net/gh/3kh0/3kh0.github.io/assets/images/favicon.ico",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "https://cdn.jsdelivr.net/gh/3kh0/3kh0.github.io/assets/images/favicon.ico",
       "sizes": "512x512",
       "type": "image/png"
     }
